@@ -2,21 +2,23 @@ pipeline {
     agent any
 
     environment {
-        MAVEN_HOME = '/opt/maven'         // Path where Maven 3.9.10 is installed
-        PATH = "${MAVEN_HOME}/bin:${env.PATH}"  // Override PATH to use it
-    }
-
-    options {
-        skipStagesAfterUnstable()
+        JAVA_HOME = '/opt/java/openjdk'
+        MAVEN_HOME = '/opt/maven'
+        PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
     }
 
     stages {
+        stage('Verify Java & Maven') {
+            steps {
+                sh 'java -version'
+                sh 'mvn -version'
+            }
+        }
         stage('Build') {
             steps {
                 sh 'mvn -B -DskipTests clean package'
             }
         }
-
         stage('Test') {
             steps {
                 sh 'mvn test'
@@ -27,7 +29,6 @@ pipeline {
                 }
             }
         }
-
         stage('Deliver') {
             steps {
                 sh './jenkins/scripts/deliver.sh'
